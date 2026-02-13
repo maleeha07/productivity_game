@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import '../user_data.dart';
+
+import 'package:productivity_tracker/user_data/user_data.dart';
+
 
 class GoalsPage extends StatefulWidget {
   const GoalsPage({super.key});

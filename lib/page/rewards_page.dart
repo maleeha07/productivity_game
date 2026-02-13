@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../user_data.dart';
+import 'package:productivity_tracker/user_data/user_data.dart';
 
 class RewardsPage extends StatelessWidget {
   const RewardsPage({super.key});
