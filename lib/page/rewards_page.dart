@@ -9,7 +9,7 @@ class RewardsPage extends StatelessWidget {
     int unlockedGifts = UserData.coins ~/ 100;
 
     List<String> gifts = [
-      "🎧 Headphones",
+      "🎧 Headset",
       "📚 New Book",
       "🍕 Free Treat",
       "🎮 Game Time",
