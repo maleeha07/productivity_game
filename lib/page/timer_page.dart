@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
-
+import 'package:flutter/material.dart';
+import 'package:productivity_tracker/user_data/user_data.dart';
 class TimerPage extends StatefulWidget {
   const TimerPage({super.key});
 
@@ -8,13 +8,12 @@ class TimerPage extends StatefulWidget {
   State<TimerPage> createState() => _TimerPageState();
 }
 
-class _TimerPageState extends State<TimerPage>
-    with WidgetsBindingObserver {
-
-  int seconds = 1500; // 25 minutes
-  int coins = 100; // starting coins
-  Timer? timer;
+class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver {
+  Timer? _timer;
+  int _secondsLeft = 25 * 60; // default 25 min
   bool isRunning = false;
+
+  String timerType = "Work"; // Work / Short Break / Long Break / Custom
 
   @override
   void initState() {
@@ -24,34 +23,55 @@ class _TimerPageState extends State<TimerPage>
 
   @override
   void dispose() {
+    _timer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
-    timer?.cancel();
     super.dispose();
   }
 
-  // Detect app state changes
+  // Detect if app goes to background while timer running
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.paused && isRunning) {
-      // User left app while timer running
-      timer?.cancel();
-      setState(() {
-        isRunning = false;
-        coins -= 10; // minus coins
-      });
+      stopTimer(distracted: true);
+    }
+  }
 
+  void startTimer(int seconds, String type) {
+    if (isRunning) return;
+
+    setState(() {
+      _secondsLeft = seconds;
+      timerType = type;
+      isRunning = true;
+    });
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_secondsLeft <= 0) {
+        timer.cancel();
+        setState(() => isRunning = false);
+        sessionCompleted();
+      } else {
+        setState(() => _secondsLeft--);
+      }
+    });
+  }
+
+  void stopTimer({bool distracted = false}) async {
+    _timer?.cancel();
+    setState(() => isRunning = false);
+
+    if (distracted) {
+      await UserData.removeCoins(10); // Deduct 10 coins
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Are you distracted? 👀"),
+        builder: (_) => AlertDialog(
+          title: const Text("Distracted!"),
           content: const Text(
-              "You left the app during focus time.\n10 coins deducted."),
+              "You left during your focus session. 10 coins deducted."),
           actions: [
             TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text("I’ll focus now"),
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
             ),
           ],
         ),
@@ -59,64 +79,115 @@ class _TimerPageState extends State<TimerPage>
     }
   }
 
-  void startTimer() {
-    if (isRunning) return;
+  void sessionCompleted() async {
+    if (timerType == "Work") {
+      await UserData.addCoins(10);
+      await UserData.addXP(20);
+    }
 
-    setState(() {
-      isRunning = true;
-    });
+    String message = timerType == "Work"
+        ? "Work session complete! +10 coins, +20 XP."
+        : "$timerType completed! Take a break.";
 
-    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (seconds > 0) {
-        setState(() {
-          seconds--;
-        });
-      } else {
-        timer.cancel();
-        setState(() {
-          isRunning = false;
-          coins += 20; // reward coins
-        });
-      }
-    });
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Session Complete"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
   }
 
-  void resetTimer() {
-    timer?.cancel();
-    setState(() {
-      seconds = 1500;
-      isRunning = false;
-    });
+  String formatTime(int seconds) {
+    final min = seconds ~/ 60;
+    final sec = seconds % 60;
+    return "${min.toString().padLeft(2, '0')}:${sec.toString().padLeft(2, '0')}";
+  }
+
+  Future<int?> showCustomTimerDialog() async {
+    final controller = TextEditingController();
+    return showDialog<int>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Custom Timer (minutes)"),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(hintText: "Enter minutes"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              final value = int.tryParse(controller.text);
+              Navigator.pop(context, value);
+            },
+            child: const Text("Start"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    int minutes = seconds ~/ 60;
-    int remainingSeconds = seconds % 60;
-
     return Scaffold(
       appBar: AppBar(title: const Text("Focus Timer")),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Center(
-            child: Text(
-              "$minutes:${remainingSeconds.toString().padLeft(2, '0')}",
-              style: const TextStyle(fontSize: 48),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Text(
+              "$timerType Timer",
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-          ),
-          const SizedBox(height: 20),
-          Text("Coins: $coins", style: const TextStyle(fontSize: 20)),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: startTimer,
-            child: const Text("Start"),
-          ),
-          ElevatedButton(
-            onPressed: resetTimer,
-            child: const Text("Reset"),
-          ),
-        ],
+            const SizedBox(height: 50),
+            Text(
+              formatTime(_secondsLeft),
+              style: const TextStyle(fontSize: 50, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 50),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: [
+                ElevatedButton(
+                  onPressed: () => startTimer(25 * 60, "Work"),
+                  child: const Text("Work 25 min"),
+                ),
+                ElevatedButton(
+                  onPressed: () => startTimer(5 * 60, "Short Break"),
+                  child: const Text("Short Break 5 min"),
+                ),
+                ElevatedButton(
+                  onPressed: () => startTimer(15 * 60, "Long Break"),
+                  child: const Text("Long Break 15 min"),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    int? mins = await showCustomTimerDialog();
+                    if (mins != null) startTimer(mins * 60, "Custom");
+                  },
+                  child: const Text("Custom Timer"),
+                ),
+              ],
+            ),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: isRunning ? () => stopTimer() : null,
+              child: const Text("Stop Timer"),
+            ),
+          ],
+        ),
       ),
     );
   }
