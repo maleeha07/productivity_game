@@ -50,7 +50,7 @@ class HomePage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 50),
+            Icon(icon, size: 35),
             const SizedBox(height: 10),
             Text(label, style: const TextStyle(fontSize: 18)),
           ],
