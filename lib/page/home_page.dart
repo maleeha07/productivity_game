@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:productivity_tracker/page/timer_page.dart';
 import 'package:productivity_tracker/user_data/user_data.dart';
 import 'package:provider/provider.dart';
 import 'goals_page.dart';
-import 'timer_page.dart';
 import 'rewards_page.dart';
 import 'dashboard_page.dart';
 import 'feeling_down_page.dart';
@@ -145,9 +145,9 @@ class _HomePageState extends State<HomePage>
                   mainAxisSpacing: 20,
                   children: [
                     buildButton("Goals", Icons.checklist, const GoalsPage()),
-                    buildButton("Timer", Icons.timer, const TimerPage()),
+                    buildButton("lock in", Icons.timer, const TimerPage()),
                     buildButton("Rewards", Icons.card_giftcard, const RewardsPage()),
-                    buildButton("Feeling Down", Icons.emoji_emotions, const FeelingDownPage()),
+                    buildButton("Feeling Down?", Icons.emoji_emotions, const FeelingDownPage()),
                     buildButton("Dashboard", Icons.dashboard, const DashboardPage()),
                   ],
                 ),

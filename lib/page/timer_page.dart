@@ -1,19 +1,25 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:productivity_tracker/user_data/user_data.dart';
-class TimerPage extends StatefulWidget {
-  const TimerPage({super.key});
+import 'package:provider/provider.dart';
+  class TimerPage extends StatefulWidget {
+    const TimerPage({Key? key}) : super(key: key);
 
+    @override
+    State<TimerPage> createState() => _TimerPageState();
+  }
   @override
   State<TimerPage> createState() => _TimerPageState();
-}
 
 class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver {
   Timer? _timer;
   int _secondsLeft = 25 * 60; // default 25 min
   bool isRunning = false;
 
-  String timerType = "Work"; // Work / Short Break / Long Break / Custom
+  String timerType = "Work";
+  
+  // Use provider for UserDataNotifier
+  UserDataNotifier get userData => context.read<UserDataNotifier>();
 
   @override
   void initState() {
@@ -61,7 +67,7 @@ class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver {
     setState(() => isRunning = false);
 
     if (distracted) {
-      await UserData.removeCoins(10); // Deduct 10 coins
+      await userData.addCoins(-10); // Deduct 10 coins
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
@@ -81,8 +87,8 @@ class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver {
 
   void sessionCompleted() async {
     if (timerType == "Work") {
-      await UserData.addCoins(10);
-      await UserData.addXP(20);
+      await userData.addCoins(10);
+      await userData.addXP(20);
     }
 
     String message = timerType == "Work"
