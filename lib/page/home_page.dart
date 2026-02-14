@@ -52,6 +52,7 @@ class _HomePageState extends State<HomePage>
             borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
+                // ignore: deprecated_member_use
                 color: Colors.blue.shade200.withOpacity(0.5),
                 blurRadius: 10,
                 offset: const Offset(0, 5),
@@ -115,6 +116,7 @@ class _HomePageState extends State<HomePage>
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
+                          // ignore: deprecated_member_use
                           color: Colors.amber.shade200.withOpacity(0.5),
                           blurRadius: 10,
                           offset: const Offset(0, 5),

@@ -27,9 +27,11 @@ class _LoginPageState extends State<LoginPage> {
       await UserService.saveUser(user);
     }
     UserService.currentUserName = user.name;
+    // ignore: use_build_context_synchronously
     context.read<UserDataNotifier>().updateUser(user);
 
     Navigator.pushReplacement(
+      // ignore: use_build_context_synchronously
       context,
       MaterialPageRoute(
         builder: (context) => HomePage(),

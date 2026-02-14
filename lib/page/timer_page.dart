@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:productivity_tracker/user_data/user_data.dart';
 import 'package:provider/provider.dart';
   class TimerPage extends StatefulWidget {
+    // ignore: use_super_parameters
     const TimerPage({Key? key}) : super(key: key);
 
     @override
@@ -69,6 +70,7 @@ class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver {
     if (distracted) {
       await userData.addCoins(-10); // Deduct 10 coins
       showDialog(
+        // ignore: use_build_context_synchronously
         context: context,
         builder: (_) => AlertDialog(
           title: const Text("Distracted!"),
@@ -96,6 +98,7 @@ class _TimerPageState extends State<TimerPage> with WidgetsBindingObserver {
         : "$timerType completed! Take a break.";
 
     showDialog(
+      // ignore: use_build_context_synchronously
       context: context,
       builder: (_) => AlertDialog(
         title: const Text("Session Complete"),
