@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:productivity_tracker/page/splash_page.dart';
 import 'package:productivity_tracker/user_data/user_data.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
-import 'page/login_page.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
@@ -26,7 +25,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Gamified Productivity App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const LoginPage(),
+      home: const SplashPage(),
     );
   }
 }
