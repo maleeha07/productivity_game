@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:productivity_tracker/user_data/user_data.dart';
+import 'package:provider/provider.dart';
 import 'goals_page.dart';
 import 'timer_page.dart';
 import 'rewards_page.dart';
+import 'dashboard_page.dart';
 import 'feeling_down_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key, required String name, required String age});
+  const HomePage({super.key});
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -20,7 +22,6 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
-    // Simple scale animation for icons
     _controller =
         AnimationController(vsync: this, duration: const Duration(seconds: 1))
           ..repeat(reverse: true);
@@ -62,7 +63,7 @@ class _HomePageState extends State<HomePage>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 50, color: const Color.fromARGB(227, 221, 189, 255)),
+              Icon(icon, size: 50, color: Colors.white),
               const SizedBox(height: 10),
               Text(
                 title,
@@ -80,20 +81,15 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
-    // Use static UserData fields directly
-    int coins = UserData.coins;
-    int xp = UserData.xp;
-    int level = UserData.level;
-    String name = UserData.name;
+    final user = context.watch<UserDataNotifier>();
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 142, 204, 248),
+      backgroundColor: Colors.blue.shade50,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              // Welcome + coins/XP
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -101,12 +97,12 @@ class _HomePageState extends State<HomePage>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Hello, $name 👋",
+                        "Hello, ${user.name} 👋",
                         style: const TextStyle(
                             fontSize: 24, fontWeight: FontWeight.bold),
                       ),
                       Text(
-                        "Level $level | XP: $xp",
+                        "Level ${user.level} | XP: ${user.xp}",
                         style: const TextStyle(fontSize: 16),
                       ),
                     ],
@@ -130,7 +126,7 @@ class _HomePageState extends State<HomePage>
                         const Icon(Icons.monetization_on, color: Colors.white),
                         const SizedBox(width: 5),
                         Text(
-                          "$coins",
+                          "${user.coins}",
                           style: const TextStyle(
                               color: Colors.white,
                               fontSize: 18,
@@ -142,7 +138,6 @@ class _HomePageState extends State<HomePage>
                 ],
               ),
               const SizedBox(height: 50),
-              // Buttons grid
               Expanded(
                 child: GridView.count(
                   crossAxisCount: 2,
@@ -152,8 +147,8 @@ class _HomePageState extends State<HomePage>
                     buildButton("Goals", Icons.checklist, const GoalsPage()),
                     buildButton("Timer", Icons.timer, const TimerPage()),
                     buildButton("Rewards", Icons.card_giftcard, const RewardsPage()),
-                    buildButton("Feeling Down", Icons.emoji_emotions,
-                        const FeelingDownPage()),
+                    buildButton("Feeling Down", Icons.emoji_emotions, const FeelingDownPage()),
+                    buildButton("Dashboard", Icons.dashboard, const DashboardPage()),
                   ],
                 ),
               ),
@@ -164,3 +159,4 @@ class _HomePageState extends State<HomePage>
     );
   }
 }
+

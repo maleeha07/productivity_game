@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:productivity_tracker/user_data/user_data.dart';
+import 'package:provider/provider.dart';
 
 class RewardsPage extends StatelessWidget {
   const RewardsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    int unlockedGifts = UserData.coins ~/ 100;
+    int unlockedGifts = context.watch<UserDataNotifier>().coins ~/ 100;
 
     List<String> gifts = [
       "🎧 Headphones with your favorite songs",
@@ -23,7 +24,7 @@ class RewardsPage extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              "Total Coins: ${UserData.coins} 🪙",
+              "Total Coins: ${context.watch<UserDataNotifier>().coins} 🪙",
               style: const TextStyle(
                   fontSize: 22, fontWeight: FontWeight.bold),
             ),

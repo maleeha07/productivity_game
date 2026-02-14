@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 
 import 'package:productivity_tracker/user_data/user_data.dart';
+import 'package:provider/provider.dart';
 
 
 class GoalsPage extends StatefulWidget {
@@ -41,7 +42,8 @@ class _GoalsPageState extends State<GoalsPage> {
   void toggleGoal(int index, bool? value) {
     setState(() {
       if (value == true && goals[index]["completed"] == false) {
-        UserData.coins += 10; // Global coins update
+        // Use provider to add coins
+        context.read<UserDataNotifier>().addCoins(10);
       }
       goals[index]["completed"] = value;
     });
@@ -109,7 +111,7 @@ class _GoalsPageState extends State<GoalsPage> {
                       color: Colors.orange),
                   const SizedBox(width: 10),
                   Text(
-                    "Coins: ${UserData.coins} 🪙",
+                    "Coins: ${context.watch<UserDataNotifier>().coins} 🪙",
                     style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold),

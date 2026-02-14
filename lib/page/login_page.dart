@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:productivity_tracker/user_data/user_data.dart';
+import 'package:provider/provider.dart';
+import '../models/user_model.dart';
+import '../services/user_service.dart';
 import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -9,62 +13,53 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
   final TextEditingController nameController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
 
-  void goToHome() {
-    if (nameController.text.isNotEmpty &&
-        ageController.text.isNotEmpty) {
+  void login() async {
+    String name = nameController.text.trim();
+    int age = int.tryParse(ageController.text.trim()) ?? 0;
+    if (name.isEmpty || age <= 0) return;
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(
-            name: nameController.text,
-            age: ageController.text,
-          ),
-        ),
-      );
+    UserModel? user = UserService.loadUser(name);
+    if (user == null) {
+      user = UserModel(name: name, age: age);
+      await UserService.saveUser(user);
     }
+    UserService.currentUserName = user.name;
+    context.read<UserDataNotifier>().updateUser(user);
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomePage(),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Login")),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: "Enter your name",
-                border: OutlineInputBorder(),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(labelText: "Name"),
               ),
-            ),
-
-            const SizedBox(height: 20),
-
-            TextField(
-              controller: ageController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: "Enter your age",
-                border: OutlineInputBorder(),
+              const SizedBox(height: 20),
+              TextField(
+                controller: ageController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: "Age"),
               ),
-            ),
-
-            const SizedBox(height: 30),
-
-            ElevatedButton(
-              onPressed: goToHome,
-              child: const Text("Continue"),
-            ),
-          ],
+              const SizedBox(height: 40),
+              ElevatedButton(onPressed: login, child: const Text("Login"))
+            ],
+          ),
         ),
       ),
     );

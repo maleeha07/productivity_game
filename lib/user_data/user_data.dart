@@ -1,69 +1,42 @@
-// ignore: depend_on_referenced_packages
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/material.dart';
+import 'package:productivity_tracker/models/task_model.dart';
+import 'package:productivity_tracker/models/user_model.dart';
+import 'package:productivity_tracker/services/user_service.dart';
 
-class UserData {
-  static String name = "";
-  static int age = 0;
-  static int coins = 0;
-  static int xp = 0;
-  static int level = 1;
+class UserDataNotifier extends ChangeNotifier {
+  UserModel? user = UserService.getCurrentUser();
 
-  // ------------------------
-  // Load saved data from shared_preferences
-  // ------------------------
-  static Future<void> loadData() async {
-    final prefs = await SharedPreferences.getInstance();
-    name = prefs.getString('name') ?? "";
-    age = prefs.getInt('age') ?? 0;
-    coins = prefs.getInt('coins') ?? 0;
-    xp = prefs.getInt('xp') ?? 0;
-    level = prefs.getInt('level') ?? 1;
+  void updateUser(UserModel updatedUser) {
+    user = updatedUser;
+    notifyListeners();
   }
 
-  // ------------------------
-  // Save all current data to shared_preferences
-  // ------------------------
-  static Future<void> saveData() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('name', name);
-    await prefs.setInt('age', age);
-    await prefs.setInt('coins', coins);
-    await prefs.setInt('xp', xp);
-    await prefs.setInt('level', level);
+  int get coins => user?.coins ?? 0;
+  int get xp => user?.xp ?? 0;
+  int get level => user?.level ?? 1;
+  String get name => user?.name ?? "";
+  int get age => user?.age ?? 0;
+  List<Task> tasks() => user?.tasks ?? [];
+
+  Future<void> addCoins(int amount) async {
+    if (user == null) return;
+    user!.coins += amount;
+    await UserService.saveUser(user!);
+    notifyListeners();
   }
 
-  // ------------------------
-  // Set user name and age
-  // ------------------------
-  static Future<void> setUser(String userName, int userAge) async {
-    name = userName;
-    age = userAge;
-    await saveData();
+  Future<void> addXP(int amount) async {
+    if (user == null) return;
+    user!.xp += amount;
+    user!.level = (user!.xp ~/ 100) + 1;
+    await UserService.saveUser(user!);
+    notifyListeners();
   }
 
-  // ------------------------
-  // Add coins
-  // ------------------------
-  static Future<void> addCoins(int amount) async {
-    coins += amount;
-    await saveData();
-  }
-
-  // ------------------------
-  // Remove coins
-  // ------------------------
-  static Future<void> removeCoins(int amount) async {
-    coins -= amount;
-    if (coins < 0) coins = 0;
-    await saveData();
-  }
-
-  // ------------------------
-  // Add XP
-  // ------------------------
-  static Future<void> addXP(int amount) async {
-    xp += amount;
-    level = (xp ~/ 100) + 1; // 100 XP per level
-    await saveData();
+  Future<void> updateTasks(List<Task> updatedTasks) async {
+    if (user == null) return;
+    user!.tasks = updatedTasks;
+    await UserService.saveUser(user!);
+    notifyListeners();
   }
 }
